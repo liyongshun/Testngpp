@@ -5,16 +5,22 @@ TestNG++使用cmake作为构建系统。因此，为了构建TestNG++，你需�
 到TestNG++的下载页面下载最新的发布版本。尽管你可以直接从源代码库checkout最新的源代码，但它的稳定性无法得到保证。
 
 1.1 Linux/Mac OS
-随后将源代码包解压到某个目录。假社在Linux平台上，我们解压的目录是：/home/arthur/testngpp. ``` arthur> cd /home/arthur/testngpp
+随后将源代码包解压到某个目录。假社在Linux平台上，我们解压的目录是：/home/arthur/testngpp. 
+
+```
+arthur> cd /home/arthur/testngpp
 
 arthur> mkdir build
 
-arthur> cd build ```
+arthur> cd build
+
+```
 
 然后运行cmake，此时，你可以通过变量 CMAKE_INSTALL_PREFIX 指定 TestNG++的安装路径。如果你不指定，则默认的安装路径是/usr/local。
 
-假设，我们想把TestNG++安装到目录/home/arthur/myproject : ```
+假设，我们想把TestNG++安装到目录/home/arthur/myproject : 
 
+```
 arthur> cmake -DCMAKE_INSTALL_PREFIX=/home/arthur/myproject ..
 
 -- The C compiler identification is GNU -- The CXX compiler identification is GNU -- Checking whether C compiler has -isysroot -- Checking whether C compiler has -isysroot - yes -- Check for working C compiler: /usr/bin/gcc -- Check for working C compiler: /usr/bin/gcc -- works -- Detecting C compiler ABI info -- Detecting C compiler ABI info - done -- Checking whether CXX compiler has -isysroot -- Checking whether CXX compiler has -isysroot - yes -- Check for working CXX compiler: /usr/bin/c++ -- Check for working CXX compiler: /usr/bin/c++ -- works -- Detecting CXX compiler ABI info -- Detecting CXX compiler ABI info - done -- Found PythonInterp: /usr/bin/python2.5 -- Configuring done -- Generating done -- Build files have been written to: /home/arthur/testngpp/build
@@ -51,8 +57,9 @@ Windows的安装和配置请参考文档TestNG++ Installation & Configuration Gu
 比如，我们要测试的类名为DLModuleLoader，所以，我们可以将我们的测试文件命名为TestDLModuleLoader.h。
 
 2.2 头文件
-然后，你需要包含TestNG++的头文件 testngpp.hpp ；像这样： ```
+然后，你需要包含TestNG++的头文件 testngpp.hpp ；像这样：
 
+```
 include
 ```
 
@@ -103,8 +110,9 @@ FIXTURE(DLModuleLoader) { TEST(should be able to load modules whose name does no
 
 TEST() 用来定义一个测试用例。括号里面的部分是 test name ，和 fixture name 一样，它可以使用你的编译器和所允许的任何字符。并且，同样也要遵守宏参数的语法约束。
 
-比如，我可以将上面的测试用例用中文来命名： ```
+比如，我可以将上面的测试用例用中文来命名：
 
+```
 include
 include "DLModuleLoader.h"
 FIXTURE(DLModuleLoader) { TEST(可以在不需要指明后缀".so"的情况下加载一个模块) { DLModuleLoader* loader = new DLModuleLoader();
@@ -128,12 +136,14 @@ TestNG++提供的测试断言如下：
 2.5.1 EXPECT vs. ASSERT
 ”快速失败“ 是个好的原则，但对于C++这种需要程序员自己进行资源管理的语言而言，有时候快速失败可能会带来问题。比如，对于这个例子，如果断言失败将会造成内存泄露。
 
-``` TEST(可以在不需要指明后缀".so"的情况下加载一个模块) { DLModuleLoader* loader = new DLModuleLoader();
+``` 
+TEST(可以在不需要指明后缀".so"的情况下加载一个模块) { DLModuleLoader* loader = new DLModuleLoader();
 
   ASSERT_THROWS_NOTHING(loader->load("libMySuite"));
 
   delete loader; // 如果上面的断言失败，此语句将得不到执行
-} ```
+}
+```
 
 所以，TestNG++提供了另外一套Assertion，以让断言失败后，测试能够继续得以执行。这些Assertion和之前的ASSERT断言一一对应，但以EXPECT开头：
 
@@ -141,16 +151,19 @@ TestNG++提供的测试断言如下：
 
 这样，上面用例就可以改写为：
 
-``` TEST(可以在不需要指明后缀".so"的情况下加载一个模块) { DLModuleLoader* loader = new DLModuleLoader();
+``` 
+TEST(可以在不需要指明后缀".so"的情况下加载一个模块) { DLModuleLoader* loader = new DLModuleLoader();
 
   EXPECT_THROWS_NOTHING(loader->load("libMySuite"));
 
   delete loader; // 即使上面的断言失败，此语句仍将得到执行
-} ```
+} 
+```
 
 对于这个例子，EXPECT工作的很好。但在另外一些情况下，它将会导致晦涩复杂的测试。比如：
 
-``` TEST(应该能够根据名字找到相应的test case) { DLModuleLoader* loader = new DLModuleLoader();
+``` 
+TEST(应该能够根据名字找到相应的test case) { DLModuleLoader* loader = new DLModuleLoader();
 
   Suite* suite = 0;
   EXPECT_THROW_NOTHING(suite = loader->load("libMySuite"));
@@ -168,12 +181,14 @@ TestNG++提供的测试断言如下：
   }
 
   delete loader; 
-} ```
+} 
+```
 
 2.5.2 用例级别的资源管理
 TestNG++提供了另外一种机制来帮助编写简单的测试。
 
-``` TEST(应该能够根据名字找到相应的test case) { DLModuleLoader* loader = new DLModuleLoader();
+``` 
+TEST(应该能够根据名字找到相应的test case) { DLModuleLoader* loader = new DLModuleLoader();
 
   __DO__      // 从这里开始是可能失败的部分
 
@@ -193,7 +208,8 @@ TestNG++提供了另外一种机制来帮助编写简单的测试。
   delete loader;
 
   __DONE__ // 不要忘了写它 
-} ```
+} 
+```
 
 由于__DO__里面的每一个断言都用的是ASSERT——“快速失败”断言，所以任何一个断言失败都会导致__DO__的部分立即中止，但__CLEANUP__的部分却无论成功与失败都肯定会得到执行。这种机制也可以被理解为用例级别的setup/teardown。
 
@@ -206,7 +222,6 @@ TestNG++提供了另外一种机制来帮助编写简单的测试。
 在测试成功运行之后，我们来编写第二个用例。
 
 ```
-
 include
 include "DLModuleLoader.h"
 FIXTURE(DLModuleLoader) { TEST(可以在不需要指明后缀".so"的情况下加载一个模块) { DLModuleLoader* loader = new DLModuleLoader();
@@ -271,7 +286,8 @@ C/C++语言本身并没有Annotation的机制，但TestNG++利用C/C++的注释�
 
 annotation "test" 用来标示下面的方法是一个测试用例。
 
-``` // @fixture struct TestCFoo : public TESTNGPP_NS::TestFixture { ... };
+``` 
+// @fixture struct TestCFoo : public TESTNGPP_NS::TestFixture { ... };
 
 ```
 
@@ -289,7 +305,6 @@ Annotation还可以有可选的 key=value list；它们需要遵从如下规则�
 随后我们编写针对unload的测试，传统的做法如下：
 
 ```
-
 include
 include "DLModuleLoader.h"
 FIXTURE(DLModuleLoader) { DLModuleLoader* loader;
